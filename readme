@@ -1,0 +1,10 @@
+set max_iter to a small value to avoid 
+---------
+Traceback (most recent call last):
+  File "crnn_main.py", line 182, in <module>
+    val(crnn, test_dataset, criterion)
+  File "crnn_main.py", line 129, in val
+    data = val_iter.next()
+  File "/data/xiaohang/anaconda2/lib/python2.7/site-packages/torch/utils/data/dataloader.py", line 164, in __next__
+    raise StopIteration
+StopIteration
