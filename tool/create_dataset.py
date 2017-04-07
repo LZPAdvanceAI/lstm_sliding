@@ -19,6 +19,7 @@ def createDataset(outputPath, labelPath):
     """
     with open(labelPath, 'r') as file:
         labelList = file.readlines()
+    labelList = sorted(labelList, key=lambda line: len(line.split(',')))
 
     nSamples = len(labelList)
     env = lmdb.open(outputPath, map_size=1099511627776)
@@ -42,5 +43,5 @@ def createDataset(outputPath, labelPath):
 
 
 if __name__ == '__main__':
-    #createDataset('data/train_lmdb', 'train.txt')
+    createDataset('data/train_lmdb', 'train.txt')
     createDataset('data/test_lmdb', 'test.txt')
