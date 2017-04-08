@@ -39,12 +39,14 @@ class lmdbDataset(Dataset):
         return self.nSamples
 
     def __getitem__(self, index):
-        assert index <= len(self), 'index range error'
+        assert index <= len(self), 'index range error {0} vs {1}'.format(index).format(len(self))
         index += 1
         with self.env.begin(write=False) as txn:
             traject_key = 'traject-%09d' % index
-            traject_list = str(txn.get(traject_key)).split(',')
-            traject = torch.LongTensor([long(traject_list[i]) for i in range(len(traject_list))])
+            #traject_list = str(txn.get(traject_key)).split(',')
+            #traject = torch.LongTensor([long(traject_list[i]) for i in range(len(traject_list))])
+            traject = str(txn.get(traject_key))
+
             if self.transform is not None:
                 traject = self.transform(traject)
 

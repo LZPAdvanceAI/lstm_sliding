@@ -31,8 +31,8 @@ parser.add_argument('--Diters', type=int, default=5, help='number of D iters per
 parser.add_argument('--experiment', default=None, help='Where to store samples and models')
 parser.add_argument('--displayInterval', type=int, default=500, help='Interval to be displayed')
 parser.add_argument('--n_test_disp', type=int, default=10, help='Number of samples to display when test')
-parser.add_argument('--valInterval', type=int, default=100, help='Interval to be displayed')
-parser.add_argument('--saveInterval', type=int, default=500, help='Interval to be displayed')
+parser.add_argument('--valInterval', type=int, default=10000, help='Interval to be displayed')
+parser.add_argument('--saveInterval', type=int, default=10000, help='Interval to be displayed')
 parser.add_argument('--adam', action='store_true', help='Whether to use adam (default is rmsprop)')
 parser.add_argument('--adadelta', action='store_true', help='Whether to use adadelta (default is rmsprop)')
 parser.add_argument('--keep_ratio', action='store_true', help='whether to keep ratio for image resize')
@@ -83,7 +83,7 @@ if opt.crnn != '':
     crnn.load_state_dict(torch.load(opt.crnn))
 print(crnn)
 
-traject = torch.LongTensor(opt.batchSize, 30)
+traject = torch.LongTensor(opt.batchSize, 60)
 text = torch.IntTensor(opt.batchSize * 5)
 length = torch.IntTensor(opt.batchSize)
 
@@ -108,8 +108,20 @@ elif opt.adadelta:
 else:
     optimizer = optim.RMSprop(crnn.parameters(), lr=opt.lr)
 
+def padding2tensor(trajects):
+    nTrajs = len(trajects)
+    maxLen = max([len(trajects[i].split(',')) for i in range(len(trajects))])
+    new_trajects = torch.LongTensor(nTrajs, maxLen)
+    for i in range(nTrajs):
+        traject = trajects[i].split(',')
+        trajLen = len(traject)
+        if trajLen < maxLen:
+            padding = [traject[trajLen-1]] * (maxLen - trajLen)
+            traject.extend(padding)
+        new_trajects[i] = torch.LongTensor([long(traject[j]) for j in range(maxLen)])
+    return new_trajects
 
-def val(net, dataset, criterion, max_iter=10):
+def val(net, dataset, criterion, max_iter=1000):
     print('Start val')
 
     for p in crnn.parameters():
@@ -117,7 +129,7 @@ def val(net, dataset, criterion, max_iter=10):
 
     net.eval()
     data_loader = torch.utils.data.DataLoader(
-        dataset, shuffle=True, batch_size=opt.batchSize, num_workers=int(opt.workers))
+        dataset, shuffle=False, batch_size=opt.batchSize, num_workers=int(opt.workers))
     val_iter = iter(data_loader)
 
     i = 0
@@ -128,6 +140,8 @@ def val(net, dataset, criterion, max_iter=10):
         data = val_iter.next()
         i += 1
         cpu_trajects, cpu_texts = data
+        cpu_trajects = padding2tensor(cpu_trajects)
+        #print(cpu_trajects)
         #print(cpu_texts)
         batch_size = cpu_trajects.size(0)
         utils.loadData(traject, cpu_trajects)
@@ -158,10 +172,12 @@ def val(net, dataset, criterion, max_iter=10):
 
 #  val(crnn, test_dataset, criterion)
 #  exit(0)
-
 def trainBatch(net, criterion, optimizer):
     data = train_iter.next()
     cpu_trajects, cpu_texts = data
+    cpu_trajects = padding2tensor(cpu_trajects)
+    #print(cpu_trajects)
+    #print(cpu_texts)
     batch_size = cpu_trajects.size(0)
     utils.loadData(traject, cpu_trajects)
     t, l = converter.encode(cpu_texts)
@@ -177,7 +193,7 @@ def trainBatch(net, criterion, optimizer):
     return cost
 
 
-val(crnn, test_dataset, criterion)
+#val(crnn, test_dataset, criterion)
 
 for epoch in range(opt.niter):
     train_iter = iter(train_loader)

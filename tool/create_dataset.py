@@ -1,3 +1,4 @@
+import random
 import os
 import lmdb # install lmdb by "pip install lmdb"
 import numpy as np
@@ -9,7 +10,7 @@ def writeCache(env, cache):
 
 
 #def createDataset(outputPath, imagePathList, labelList, lexiconList=None, checkValid=True):
-def createDataset(outputPath, labelPath):
+def createDataset(outputPath, labelPath, shuffLen):
     """
     Create LMDB dataset for Sliding LSTM training.
 
@@ -19,7 +20,7 @@ def createDataset(outputPath, labelPath):
     """
     with open(labelPath, 'r') as file:
         labelList = file.readlines()
-    labelList = sorted(labelList, key=lambda line: len(line.split(',')))
+    labelList = sorted(labelList, key=lambda line: len(line.split(','))+random.randint(-shuffLen,shuffLen))
 
     nSamples = len(labelList)
     env = lmdb.open(outputPath, map_size=1099511627776)
@@ -43,5 +44,5 @@ def createDataset(outputPath, labelPath):
 
 
 if __name__ == '__main__':
-    createDataset('data/train_lmdb', 'train.txt')
-    createDataset('data/test_lmdb', 'test.txt')
+    createDataset('data/train_lmdb', 'train.txt', 2)
+    createDataset('data/test_lmdb', 'test.txt', 0)
