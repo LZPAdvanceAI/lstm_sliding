@@ -33,8 +33,9 @@ parser.add_argument('--displayInterval', type=int, default=500, help='Interval t
 parser.add_argument('--n_test_disp', type=int, default=10, help='Number of samples to display when test')
 parser.add_argument('--valInterval', type=int, default=10000, help='Interval to be displayed')
 parser.add_argument('--saveInterval', type=int, default=10000, help='Interval to be displayed')
-parser.add_argument('--adam', action='store_true', help='Whether to use adam (default is rmsprop)')
-parser.add_argument('--adadelta', action='store_true', help='Whether to use adadelta (default is rmsprop)')
+parser.add_argument('--adam', action='store_true', help='Whether to use adam (default is sgd)')
+parser.add_argument('--adadelta', action='store_true', help='Whether to use adadelta (default is sgd)')
+parser.add_argument('--rmsprop', action='store_true', help='Whether to use rmsprop (default is sgd)')
 parser.add_argument('--keep_ratio', action='store_true', help='whether to keep ratio for image resize')
 parser.add_argument('--random_sample', action='store_true', help='whether to sample the dataset with random sampler')
 opt = parser.parse_args()
@@ -105,8 +106,12 @@ if opt.adam:
                            betas=(opt.beta1, 0.999))
 elif opt.adadelta:
     optimizer = optim.Adadelta(crnn.parameters(), lr=opt.lr)
-else:
+elif opt.rmsprop:
     optimizer = optim.RMSprop(crnn.parameters(), lr=opt.lr)
+else:
+    optimizer = torch.optim.SGD(crnn.parameters(), lr=opt.lr,
+                                momentum=0.9,
+                                weight_decay=1e-4)
 
 def padding2tensor(trajects):
     nTrajs = len(trajects)
