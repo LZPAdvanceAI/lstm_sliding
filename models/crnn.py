@@ -35,7 +35,7 @@ class CRNN(nn.Module):
         self.ngpu = ngpu
 
         cnn = nn.Sequential()
-        cnn.add_module('embedding', nn.Embedding(26,256))
+        cnn.add_module('embedding', nn.Embedding(30,256))
 
         self.cnn = cnn
         self.rnn = nn.Sequential(

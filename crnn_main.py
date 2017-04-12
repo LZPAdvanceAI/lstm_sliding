@@ -31,8 +31,8 @@ parser.add_argument('--Diters', type=int, default=5, help='number of D iters per
 parser.add_argument('--experiment', default=None, help='Where to store samples and models')
 parser.add_argument('--displayInterval', type=int, default=500, help='Interval to be displayed')
 parser.add_argument('--n_test_disp', type=int, default=10, help='Number of samples to display when test')
-parser.add_argument('--valInterval', type=int, default=10000, help='Interval to be displayed')
-parser.add_argument('--saveInterval', type=int, default=10000, help='Interval to be displayed')
+parser.add_argument('--valInterval', type=int, default=1000, help='Interval to be displayed')
+parser.add_argument('--saveInterval', type=int, default=1000, help='Interval to be displayed')
 parser.add_argument('--adam', action='store_true', help='Whether to use adam (default is sgd)')
 parser.add_argument('--adadelta', action='store_true', help='Whether to use adadelta (default is sgd)')
 parser.add_argument('--rmsprop', action='store_true', help='Whether to use rmsprop (default is sgd)')
@@ -126,7 +126,7 @@ def padding2tensor(trajects):
         new_trajects[i] = torch.LongTensor([long(traject[j]) for j in range(maxLen)])
     return new_trajects
 
-def val(net, dataset, criterion, max_iter=1000):
+def val(net, dataset, criterion, max_iter=100):
     print('Start val')
 
     for p in crnn.parameters():
